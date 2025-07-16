@@ -2,11 +2,11 @@ import type React from "react";
 import type { Metadata } from "next";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "Stok Sayım Uygulaması (Sıfırdan)",
-  description: "Tamamen kendi oluşturduğunuz bileşenlerle barkod okuma",
-  viewport:
-    "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
+export const metadata = {
+  title: "Barkod Okuyucu",
+  description: "Kamerayla barkod okuma uygulaması",
+  manifest: "/manifest.json",
+  themeColor: "#4f46e5",
 };
 
 export default function RootLayout({
@@ -17,6 +17,11 @@ export default function RootLayout({
   return (
     <html lang="tr">
       <head>
+        {/* app/layout.tsx içindeki <head> etiketi altına */}
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <meta name="theme-color" content="#4f46e5" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
         <style>{`
           /* Global sıfırlamalar ve temel stiller */
           * {
