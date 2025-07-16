@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import type React from "react";
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface Product {
   id: string;
@@ -47,7 +47,7 @@ export default function StokSayimApp() {
     type: "success" | "error" = "success"
   ) => {
     setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
+    setTimeout(() => setNotification(null), 4000); // 4 saniye sonra bildirimi kaldır
   };
 
   // Barkod ile ürün ara veya ekle
@@ -184,6 +184,8 @@ export default function StokSayimApp() {
               color: "white",
               fontWeight: "500",
               boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+              maxWidth: "90%",
+              textAlign: "center",
             }}
           >
             {notification.message}
@@ -192,12 +194,9 @@ export default function StokSayimApp() {
 
         {/* Header */}
         <div
+          className="card"
           style={{
-            backgroundColor: "white",
-            borderRadius: "12px",
-            padding: "20px",
             marginBottom: "16px",
-            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
             textAlign: "center",
           }}
         >
@@ -230,13 +229,11 @@ export default function StokSayimApp() {
 
         {/* Tabs */}
         <div
+          className="card"
           style={{
-            backgroundColor: "white",
-            borderRadius: "12px",
             padding: "4px",
             marginBottom: "16px",
             display: "flex",
-            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
           }}
         >
           <button
@@ -275,20 +272,15 @@ export default function StokSayimApp() {
 
         {/* Barkod Okuma Sekmesi */}
         {activeTab === "scan" && (
-          <div style={{}}>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "16px" }}
+          >
+            <HTTPSSetupGuide />
             <BarcodeScanner onBarcodeScanned={handleBarcodeScanned} />
 
             {/* Son Eklenen Ürünler */}
             {products.length > 0 && (
-              <div
-                style={{
-                  backgroundColor: "white",
-                  borderRadius: "12px",
-                  padding: "20px",
-                  marginTop: "16px",
-                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                }}
-              >
+              <div className="card">
                 <h3
                   style={{
                     fontSize: "18px",
@@ -364,17 +356,6 @@ export default function StokSayimApp() {
                 placeholder="Ürün adı veya barkod ara..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "12px 16px",
-                  border: "2px solid #e5e7eb",
-                  borderRadius: "8px",
-                  fontSize: "16px",
-                  outline: "none",
-                  transition: "border-color 0.2s",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = "#3b82f6")}
-                onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
               />
             </div>
 
@@ -384,13 +365,11 @@ export default function StokSayimApp() {
             >
               {filteredProducts.length === 0 ? (
                 <div
+                  className="card"
                   style={{
-                    backgroundColor: "white",
-                    borderRadius: "12px",
                     padding: "40px 20px",
                     textAlign: "center",
                     color: "#666",
-                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
                   }}
                 >
                   {products.length === 0
@@ -425,7 +404,244 @@ export default function StokSayimApp() {
   );
 }
 
-// Barkod Tarayıcı Komponenti
+// HTTPS Kurulum Rehberi Komponenti
+function HTTPSSetupGuide() {
+  const [showGuide, setShowGuide] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+
+  const isSecure =
+    typeof window !== "undefined" && window.location.protocol === "https:";
+
+  if (isSecure) return null;
+
+  const steps = [
+    {
+      title: "🚀 Ngrok ile Hızlı Çözüm (Önerilen)",
+      content: (
+        <div>
+          <p style={{ marginBottom: "12px" }}>En kolay ve hızlı çözüm:</p>
+          <div
+            style={{
+              backgroundColor: "#1f2937",
+              color: "#f9fafb",
+              padding: "12px",
+              borderRadius: "6px",
+              fontFamily: "monospace",
+              fontSize: "14px",
+              marginBottom: "12px",
+            }}
+          >
+            # 1. Ngroku indirin: https://ngrok.com/download
+            <br /># 2. Terminalde çalıştırın:
+            <br />
+            ngrok http 3000
+            <br /># 3. Verilen HTTPS URLsini kullanın
+          </div>
+          <p style={{ fontSize: "14px", color: "#666" }}>
+            Ngrok size https://abc123.ngrok.io gibi bir URL verecek. Bu URLyi
+            telefonunuzda açın.
+          </p>
+        </div>
+      ),
+    },
+    {
+      title: "🔧 Next.js HTTPS Kurulumu",
+      content: (
+        <div>
+          <p style={{ marginBottom: "12px" }}>Development için HTTPS:</p>
+          <div
+            style={{
+              backgroundColor: "#1f2937",
+              color: "#f9fafb",
+              padding: "12px",
+              borderRadius: "6px",
+              fontFamily: "monospace",
+              fontSize: "14px",
+              marginBottom: "12px",
+            }}
+          >
+            # 1. mkcert kurulumu:
+            <br />
+            brew install mkcert # macOS
+            <br />
+            choco install mkcert # Windows
+            <br />
+            <br /># 2. Sertifika oluştur:
+            <br />
+            mkcert localhost 192.168.1.17
+            <br />
+            <br /># 3. Next.jsi HTTPS ile başlat:
+            <br />
+            npm run dev -- --experimental-https
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "📱 Alternatif Çözümler",
+      content: (
+        <div>
+          <div style={{ marginBottom: "16px" }}>
+            <h4 style={{ margin: "0 0 8px 0", color: "#1f2937" }}>
+              1. Vercel Deploy
+            </h4>
+            <p style={{ fontSize: "14px", color: "#666", margin: 0 }}>
+              Projeyi Vercele deploy edin, otomatik HTTPS alır.
+            </p>
+          </div>
+          <div style={{ marginBottom: "16px" }}>
+            <h4 style={{ margin: "0 0 8px 0", color: "#1f2937" }}>
+              2. Netlify Deploy
+            </h4>
+            <p style={{ fontSize: "14px", color: "#666", margin: 0 }}>
+              GitHuba push edip Netlifyda deploy edin.
+            </p>
+          </div>
+          <div>
+            <h4 style={{ margin: "0 0 8px 0", color: "#1f2937" }}>
+              3. Cloudflare Tunnel
+            </h4>
+            <p style={{ fontSize: "14px", color: "#666", margin: 0 }}>
+              cloudflared tunnel --url http://localhost:3000
+            </p>
+          </div>
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <div
+      className="card"
+      style={{
+        marginBottom: "16px",
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: "#fef3c7",
+          border: "2px solid #f59e0b",
+          borderRadius: "8px",
+          padding: "16px",
+          marginBottom: "16px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            marginBottom: "8px",
+          }}
+        >
+          <span style={{ fontSize: "24px" }}>⚠️</span>
+          <h3 style={{ margin: 0, color: "#92400e", fontSize: "18px" }}>
+            HTTPS Gerekli
+          </h3>
+        </div>
+        <p style={{ margin: 0, color: "#92400e", fontSize: "14px" }}>
+          iOS Safaride kamera kullanmak için güvenli bağlantı (HTTPS)
+          zorunludur. Aşağıdaki çözümlerden birini uygulayın:
+        </p>
+      </div>
+
+      <button
+        onClick={() => setShowGuide(!showGuide)}
+        style={{
+          width: "100%",
+          marginBottom: showGuide ? "16px" : "0",
+        }}
+      >
+        {showGuide ? "🔼 Rehberi Gizle" : "🔽 HTTPS Kurulum Rehberi"}
+      </button>
+
+      {showGuide && (
+        <div>
+          {/* Step Navigation */}
+          <div style={{ display: "flex", marginBottom: "20px", gap: "8px" }}>
+            {steps.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentStep(index)}
+                style={{
+                  flex: 1,
+                  padding: "8px",
+                  backgroundColor:
+                    currentStep === index ? "#3b82f6" : "#f3f4f6",
+                  color: currentStep === index ? "white" : "#666",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontSize: "12px",
+                  cursor: "pointer",
+                }}
+              >
+                {index + 1}
+              </button>
+            ))}
+          </div>
+
+          {/* Step Content */}
+          <div
+            style={{
+              border: "1px solid #e5e7eb",
+              borderRadius: "8px",
+              padding: "16px",
+            }}
+          >
+            <h4 style={{ margin: "0 0 12px 0", color: "#1f2937" }}>
+              {steps[currentStep].title}
+            </h4>
+            {steps[currentStep].content}
+          </div>
+
+          {/* Navigation Buttons */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginTop: "16px",
+            }}
+          >
+            <button
+              onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+              disabled={currentStep === 0}
+              style={{
+                padding: "8px 16px",
+                backgroundColor: currentStep === 0 ? "#f3f4f6" : "#6b7280",
+                color: currentStep === 0 ? "#9ca3af" : "white",
+                border: "none",
+                borderRadius: "6px",
+                cursor: currentStep === 0 ? "not-allowed" : "pointer",
+              }}
+            >
+              ← Önceki
+            </button>
+            <button
+              onClick={() =>
+                setCurrentStep(Math.min(steps.length - 1, currentStep + 1))
+              }
+              disabled={currentStep === steps.length - 1}
+              style={{
+                padding: "8px 16px",
+                backgroundColor:
+                  currentStep === steps.length - 1 ? "#f3f4f6" : "#6b7280",
+                color: currentStep === steps.length - 1 ? "#9ca3af" : "white",
+                border: "none",
+                borderRadius: "6px",
+                cursor:
+                  currentStep === steps.length - 1 ? "not-allowed" : "pointer",
+              }}
+            >
+              Sonraki →
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Gelişmiş Kamera Tespiti ve Barkod Tarayıcı
 function BarcodeScanner({
   onBarcodeScanned,
 }: {
@@ -435,66 +651,420 @@ function BarcodeScanner({
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [manualBarcode, setManualBarcode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [recentBarcodes, setRecentBarcodes] = useState<string[]>([]);
 
-  // Kamerayı başlat
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const [systemInfo, setSystemInfo] = useState<{
+    userAgent: string;
+    isIOS: boolean;
+    isAndroid: boolean;
+    isSafari: boolean;
+    isChrome: boolean;
+    isSecure: boolean;
+    hasMediaDevices: boolean;
+    hasGetUserMedia: boolean;
+    protocol: string;
+    hostname: string;
+  } | null>(null);
+
+  // Detaylı sistem analizi
+  useEffect(() => {
+    if (typeof window !== "undefined" && typeof navigator !== "undefined") {
+      const userAgent = navigator.userAgent;
+      const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+      const isAndroid = /Android/.test(userAgent);
+      const isSafari = /Safari/.test(userAgent) && !/Chrome/.test(userAgent);
+      const isChrome = /Chrome/.test(userAgent);
+      const isSecure =
+        window.location.protocol === "https:" ||
+        window.location.hostname === "localhost";
+      const hasMediaDevices = !!navigator.mediaDevices;
+      const hasGetUserMedia = !!(
+        navigator.mediaDevices && navigator.mediaDevices.getUserMedia
+      );
+      const protocol = window.location.protocol;
+      const hostname = window.location.hostname;
+
+      const info = {
+        userAgent,
+        isIOS,
+        isAndroid,
+        isSafari,
+        isChrome,
+        isSecure,
+        hasMediaDevices,
+        hasGetUserMedia,
+        protocol,
+        hostname,
+      };
+
+      setSystemInfo(info);
+
+      console.log("🔍 Detaylı Sistem Analizi:", info);
+
+      // Kamera cihazlarını listele
+      if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+        navigator.mediaDevices
+          .enumerateDevices()
+          .then((devices) => {
+            const videoDevices = devices.filter(
+              (device) => device.kind === "videoinput"
+            );
+            console.log("📹 Bulunan Kamera Cihazları:", videoDevices);
+            console.log("📹 Toplam Kamera Sayısı:", videoDevices.length);
+          })
+          .catch((err) => {
+            console.error("❌ Cihaz listeleme hatası:", err);
+          });
+      }
+
+      // İzin durumunu kontrol et
+      if (navigator.permissions) {
+        navigator.permissions
+          .query({ name: "camera" as PermissionName })
+          .then((permissionStatus) => {
+            console.log("🔐 Kamera İzin Durumu:", permissionStatus.state);
+          })
+          .catch((err) => {
+            console.log("🔐 İzin durumu kontrol edilemedi:", err);
+          });
+      }
+    }
+  }, []);
+
+  // Kamerayı başlat - Çoklu deneme stratejisi
   const startCamera = async () => {
+    if (!systemInfo) {
+      setError("Sistem bilgileri yüklenemedi");
+      return;
+    }
+
+    if (!systemInfo.hasGetUserMedia) {
+      setError("Bu tarayıcı kamera API'sini desteklemiyor");
+      return;
+    }
+
+    if (!systemInfo.isSecure) {
+      setError("Kamera erişimi için HTTPS bağlantısı gerekli");
+      return;
+    }
+
     try {
+      setIsLoading(true);
       setError(null);
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: "environment", // Arka kamera
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
+      console.log("🚀 Kamera başlatılıyor...");
+
+      // Strateji 1: Arka kamera (environment)
+      const strategies = [
+        {
+          name: "Arka Kamera (Yüksek Kalite)",
+          constraints: {
+            video: {
+              facingMode: { exact: "environment" },
+              width: { ideal: 1920, max: 1920 },
+              height: { ideal: 1080, max: 1080 },
+            },
+            audio: false,
+          },
         },
-      });
+        {
+          name: "Arka Kamera (Orta Kalite)",
+          constraints: {
+            video: {
+              facingMode: { ideal: "environment" },
+              width: { ideal: 1280, max: 1280 },
+              height: { ideal: 720, max: 720 },
+            },
+            audio: false,
+          },
+        },
+        {
+          name: "Arka Kamera (Basit)",
+          constraints: {
+            video: {
+              facingMode: "environment",
+            },
+            audio: false,
+          },
+        },
+        {
+          name: "Ön Kamera",
+          constraints: {
+            video: {
+              facingMode: "user",
+            },
+            audio: false,
+          },
+        },
+        {
+          name: "Herhangi Bir Kamera",
+          constraints: {
+            video: true,
+            audio: false,
+          },
+        },
+      ];
+
+      let mediaStream: MediaStream | null = null;
+      let usedStrategy = "";
+
+      for (const strategy of strategies) {
+        try {
+          console.log(`🎯 Deneniyor: ${strategy.name}`);
+          mediaStream = await navigator.mediaDevices.getUserMedia(
+            strategy.constraints
+          );
+          usedStrategy = strategy.name;
+          console.log(`✅ Başarılı: ${strategy.name}`);
+          break;
+        } catch (err: any) {
+          console.log(
+            `❌ Başarısız: ${strategy.name} - ${err.name}: ${err.message}`
+          );
+          continue;
+        }
+      }
+
+      if (!mediaStream) {
+        throw new Error("Hiçbir kamera stratejisi çalışmadı");
+      }
+
+      // Kamera bilgilerini logla
+      const videoTrack = mediaStream.getVideoTracks()[0];
+      if (videoTrack) {
+        const settings = videoTrack.getSettings();
+        const capabilities = videoTrack.getCapabilities();
+        console.log("📹 Aktif Kamera Ayarları:", settings);
+        console.log("📹 Kamera Yetenekleri:", capabilities);
+        console.log("📹 Kullanılan Strateji:", usedStrategy);
+      }
+
       setStream(mediaStream);
       setIsScanning(true);
-    } catch (err) {
-      console.error("Kamera erişim hatası:", err);
-      setError(
-        "Kamera erişimi reddedildi veya mevcut değil. Lütfen tarayıcı ayarlarından kamera iznini kontrol edin."
-      );
+      setIsLoading(false);
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+        videoRef.current.play().catch((err) => {
+          console.error("Video oynatma hatası:", err);
+        });
+      }
+    } catch (err: any) {
+      console.error("💥 Kamera Başlatma Hatası:", err);
+      setIsLoading(false);
+
+      let errorMessage = "Kamera başlatılamadı";
+
+      switch (err.name) {
+        case "NotAllowedError":
+          errorMessage = systemInfo.isIOS
+            ? "Kamera izni reddedildi. iPhone Ayarlar > Safari > Kamera > İzin Ver"
+            : "Kamera izni reddedildi. Tarayıcı ayarlarından kamera iznini verin.";
+          break;
+        case "NotFoundError":
+          errorMessage =
+            "Kamera bulunamadı. Cihazınızda çalışan bir kamera olduğundan emin olun.";
+          break;
+        case "NotReadableError":
+          errorMessage =
+            "Kamera kullanımda. Diğer uygulamaları kapatıp tekrar deneyin.";
+          break;
+        case "OverconstrainedError":
+          errorMessage =
+            "Kamera ayarları uyumsuz. Cihazınız bu özellikleri desteklemiyor.";
+          break;
+        case "SecurityError":
+          errorMessage = "Güvenlik hatası. HTTPS bağlantısı gerekli.";
+          break;
+        case "AbortError":
+          errorMessage = "Kamera erişimi iptal edildi.";
+          break;
+        default:
+          errorMessage = `Kamera hatası: ${err.message || "Bilinmeyen hata"}`;
+      }
+
+      setError(errorMessage);
     }
   };
 
   // Kamerayı durdur
   const stopCamera = () => {
     if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
+      stream.getTracks().forEach((track) => {
+        track.stop();
+        console.log("🛑 Kamera kapatıldı:", track.label);
+      });
       setStream(null);
     }
     setIsScanning(false);
+    setIsLoading(false);
   };
+
+  // Sayfa kapatılırken kamerayı temizle
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []);
 
   // Manuel barkod girişi
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (manualBarcode.trim()) {
       onBarcodeScanned(manualBarcode.trim());
+
+      // Son barkodları kaydet
+      const newRecent = [
+        manualBarcode.trim(),
+        ...recentBarcodes.filter((b) => b !== manualBarcode.trim()),
+      ].slice(0, 5);
+      setRecentBarcodes(newRecent);
+      localStorage.setItem("recent-barcodes", JSON.stringify(newRecent));
+
       setManualBarcode("");
     }
   };
 
-  // Simüle edilmiş barkod okuma (gerçek uygulamada ZXing kullanılır)
-  const simulateBarcodeRead = () => {
-    const testBarcode = prompt("Test için barkod numarası girin:");
-    if (testBarcode) {
-      onBarcodeScanned(testBarcode);
-      stopCamera();
+  // Son barkodları yükle
+  useEffect(() => {
+    const saved = localStorage.getItem("recent-barcodes");
+    if (saved) {
+      try {
+        setRecentBarcodes(JSON.parse(saved));
+      } catch (e) {
+        console.error("Recent barcodes yüklenemedi:", e);
+      }
     }
-  };
+  }, []);
+
+  if (!systemInfo) {
+    return (
+      <div
+        className="card"
+        style={{
+          textAlign: "center",
+        }}
+      >
+        <div style={{ fontSize: "48px", marginBottom: "16px" }}>⏳</div>
+        <p>Sistem bilgileri yükleniyor...</p>
+      </div>
+    );
+  }
 
   return (
-    <div
-      style={{
-        backgroundColor: "white",
-        borderRadius: "12px",
-        padding: "20px",
-        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-      }}
-    >
+    <div className="card">
       {!isScanning ? (
         <div>
+          {/* Detaylı Sistem Bilgileri */}
+          <div
+            style={{
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #e9ecef",
+              borderRadius: "8px",
+              padding: "12px",
+              marginBottom: "16px",
+              fontSize: "12px",
+              color: "#666",
+            }}
+          >
+            <strong>🔍 Sistem Durumu:</strong>
+            <br />
+            📱{" "}
+            {systemInfo.isIOS
+              ? "iOS"
+              : systemInfo.isAndroid
+              ? "Android"
+              : "Desktop"}{" "}
+            | 🌐{" "}
+            {systemInfo.isSafari
+              ? "Safari"
+              : systemInfo.isChrome
+              ? "Chrome"
+              : "Diğer"}{" "}
+            | 🔒 {systemInfo.isSecure ? "HTTPS ✅" : "HTTP ❌"} | 📹{" "}
+            {systemInfo.hasGetUserMedia ? "Kamera API ✅" : "Kamera API ❌"}
+            <br />
+            <strong>URL:</strong> {systemInfo.protocol}
+            {systemInfo.hostname}
+          </div>
+
+          {/* HTTPS Uyarısı */}
+          {!systemInfo.isSecure && (
+            <div
+              style={{
+                backgroundColor: "#fff3cd",
+                border: "1px solid #ffeaa7",
+                borderRadius: "8px",
+                padding: "16px",
+                marginBottom: "16px",
+                color: "#856404",
+                fontSize: "14px",
+              }}
+            >
+              <strong>⚠️ HTTPS Gerekli</strong>
+              <br />
+              Kamera erişimi için güvenli bağlantı (HTTPS) zorunludur.
+              <br />
+              <br />
+              <strong>Çözüm:</strong>
+              <br />• URLyi https:// ile başlatın
+              <br />• Veya localhost kullanın
+              <br />• Ngrok gibi tunnel servisi kullanın
+            </div>
+          )}
+
+          {/* Kamera API Uyarısı */}
+          {!systemInfo.hasGetUserMedia && (
+            <div
+              style={{
+                backgroundColor: "#fef2f2",
+                border: "1px solid #fecaca",
+                borderRadius: "8px",
+                padding: "16px",
+                marginBottom: "16px",
+                color: "#dc2626",
+                fontSize: "14px",
+              }}
+            >
+              <strong>❌ Kamera API Desteklenmiyor</strong>
+              <br />
+              Bu tarayıcı kamera özelliğini desteklemiyor.
+              <br />
+              <br />
+              <strong>Çözüm:</strong>
+              <br />• Chrome veya Safari kullanın
+              <br />• Tarayıcınızı güncelleyin
+              <br />• Manuel barkod girişini kullanın
+            </div>
+          )}
+
+          {/* iOS Safari Özel Bilgi */}
+          {systemInfo.isIOS && systemInfo.isSafari && (
+            <div
+              style={{
+                backgroundColor: "#e7f3ff",
+                border: "1px solid #b3d9ff",
+                borderRadius: "8px",
+                padding: "16px",
+                marginBottom: "16px",
+                color: "#0066cc",
+                fontSize: "14px",
+              }}
+            >
+              <strong>📱 iOS Safari Kullanıcısı</strong>
+              <br />
+              Kamera izni için:
+              <br />
+              1. iPhone Ayarlar {">"} Safari {">"} Kamera {">"} İzin Ver
+              <br />
+              2. Sayfayı yenileyin
+              <br />
+              3. Kamera iznini onaylayın
+            </div>
+          )}
+
           {/* Kamera Başlatma */}
           <div style={{ textAlign: "center", marginBottom: "24px" }}>
             <div style={{ fontSize: "64px", marginBottom: "16px" }}>📷</div>
@@ -519,28 +1089,34 @@ function BarcodeScanner({
                   backgroundColor: "#fef2f2",
                   border: "1px solid #fecaca",
                   borderRadius: "8px",
-                  padding: "12px",
+                  padding: "16px",
                   marginBottom: "16px",
                   color: "#dc2626",
                   fontSize: "14px",
+                  textAlign: "left",
                 }}
               >
-                {error}
+                <strong>❌ Hata:</strong> {error}
+                <br />
+                <br />
+                <strong>💡 Adım Adım Çözüm:</strong>
+                <ol style={{ margin: "8px 0 0 0", paddingLeft: "20px" }}>
+                  <li>Tarayıcı ayarlarından kamera iznini kontrol edin</li>
+                  <li>Uygulamayı HTTPS üzerinden açın</li>
+                  <li>Chrome tarayıcısını deneyin (en uyumlu)</li>
+                  <li>Cihazınızı yeniden başlatın</li>
+                  <li>Manuel barkod girişini kullanın</li>
+                </ol>
               </div>
             )}
 
             <button
               onClick={startCamera}
+              disabled={
+                isLoading || !systemInfo.hasGetUserMedia || !systemInfo.isSecure
+              }
               style={{
                 width: "100%",
-                padding: "16px",
-                backgroundColor: "#3b82f6",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "16px",
-                fontWeight: "600",
-                cursor: "pointer",
                 marginBottom: "16px",
                 display: "flex",
                 alignItems: "center",
@@ -548,7 +1124,7 @@ function BarcodeScanner({
                 gap: "8px",
               }}
             >
-              📷 Kamerayı Başlat
+              {isLoading ? "🔄 Kamera Başlatılıyor..." : "📷 Kamerayı Başlat"}
             </button>
           </div>
 
@@ -561,53 +1137,143 @@ function BarcodeScanner({
           >
             <h3
               style={{
-                fontSize: "16px",
+                fontSize: "18px",
                 fontWeight: "600",
-                marginBottom: "12px",
+                marginBottom: "16px",
+                textAlign: "center",
               }}
             >
-              Manuel Barkod Girişi
+              ✏️ Manuel Barkod Girişi
             </h3>
+
             <form
               onSubmit={handleManualSubmit}
-              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+              style={{ marginBottom: "20px" }}
             >
-              <input
-                type="text"
-                value={manualBarcode}
-                onChange={(e) => setManualBarcode(e.target.value)}
-                placeholder="Barkod numarasını girin..."
+              <div style={{ display: "flex", gap: "8px" }}>
+                <input
+                  type="text"
+                  value={manualBarcode}
+                  onChange={(e) => setManualBarcode(e.target.value)}
+                  placeholder="Barkod numarasını girin..."
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  disabled={!manualBarcode.trim()}
+                  style={{
+                    padding: "14px 20px",
+                    backgroundColor: manualBarcode.trim()
+                      ? "#10b981"
+                      : "#9ca3af",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "8px",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    cursor: manualBarcode.trim() ? "pointer" : "not-allowed",
+                    transition: "background-color 0.2s",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  ✅ Ekle
+                </button>
+              </div>
+            </form>
+
+            {/* Son Kullanılan Barkodlar */}
+            {recentBarcodes.length > 0 && (
+              <div>
+                <h4
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    marginBottom: "12px",
+                    color: "#666",
+                  }}
+                >
+                  🕒 Son Kullanılan Barkodlar
+                </h4>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                  }}
+                >
+                  {recentBarcodes.map((barcode, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setManualBarcode(barcode);
+                      }}
+                      style={{
+                        padding: "8px 12px",
+                        backgroundColor: "#f8f9fa",
+                        border: "1px solid #e9ecef",
+                        borderRadius: "6px",
+                        fontSize: "14px",
+                        cursor: "pointer",
+                        textAlign: "left",
+                        transition: "background-color 0.2s",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.backgroundColor = "#e9ecef")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.backgroundColor = "#f8f9fa")
+                      }
+                    >
+                      {barcode}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Hızlı Barkod Örnekleri */}
+            <div style={{ marginTop: "20px" }}>
+              <h4
                 style={{
-                  width: "100%",
-                  padding: "12px 16px",
-                  border: "2px solid #e5e7eb",
-                  borderRadius: "8px",
-                  fontSize: "16px",
-                  outline: "none",
-                  transition: "border-color 0.2s",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = "#3b82f6")}
-                onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
-              />
-              <button
-                type="submit"
-                disabled={!manualBarcode.trim()}
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  backgroundColor: manualBarcode.trim() ? "#10b981" : "#9ca3af",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "8px",
-                  fontSize: "16px",
+                  fontSize: "14px",
                   fontWeight: "600",
-                  cursor: manualBarcode.trim() ? "pointer" : "not-allowed",
-                  transition: "background-color 0.2s",
+                  marginBottom: "12px",
+                  color: "#666",
                 }}
               >
-                ✅ Barkod Ekle
-              </button>
-            </form>
+                🚀 Test Barkodları
+              </h4>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "8px",
+                }}
+              >
+                {[
+                  "1234567890123",
+                  "9876543210987",
+                  "1111111111111",
+                  "2222222222222",
+                ].map((testBarcode) => (
+                  <button
+                    key={testBarcode}
+                    onClick={() => setManualBarcode(testBarcode)}
+                    style={{
+                      padding: "8px",
+                      backgroundColor: "#e7f3ff",
+                      border: "1px solid #b3d9ff",
+                      borderRadius: "6px",
+                      fontSize: "12px",
+                      cursor: "pointer",
+                      color: "#0066cc",
+                    }}
+                  >
+                    {testBarcode}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       ) : (
@@ -615,21 +1281,18 @@ function BarcodeScanner({
           {/* Kamera Görüntüsü */}
           <div style={{ position: "relative", marginBottom: "16px" }}>
             <video
-              ref={(video) => {
-                if (video && stream) {
-                  video.srcObject = stream;
-                  video.play();
-                }
-              }}
+              ref={videoRef}
               style={{
                 width: "100%",
-                height: "240px",
+                height: "300px",
                 backgroundColor: "#000",
                 borderRadius: "8px",
                 objectFit: "cover",
+                transform: systemInfo.isIOS ? "scaleX(-1)" : "none", // iOS için ayna efekti
               }}
               playsInline
               muted
+              autoPlay
             />
 
             {/* Barkod Okuma Çerçevesi */}
@@ -639,10 +1302,10 @@ function BarcodeScanner({
                 top: "50%",
                 left: "50%",
                 transform: "translate(-50%, -50%)",
-                width: "200px",
-                height: "80px",
-                border: "2px dashed #ef4444",
-                borderRadius: "4px",
+                width: "260px",
+                height: "120px",
+                border: "3px dashed #ef4444",
+                borderRadius: "12px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -652,80 +1315,114 @@ function BarcodeScanner({
               <div
                 style={{
                   position: "absolute",
-                  top: "-2px",
-                  left: "-2px",
-                  width: "20px",
-                  height: "20px",
-                  borderTop: "4px solid #ef4444",
-                  borderLeft: "4px solid #ef4444",
+                  top: "-6px",
+                  left: "-6px",
+                  width: "30px",
+                  height: "30px",
+                  borderTop: "6px solid #ef4444",
+                  borderLeft: "6px solid #ef4444",
+                  borderRadius: "6px 0 0 0",
                 }}
               />
               <div
                 style={{
                   position: "absolute",
-                  top: "-2px",
-                  right: "-2px",
-                  width: "20px",
-                  height: "20px",
-                  borderTop: "4px solid #ef4444",
-                  borderRight: "4px solid #ef4444",
+                  top: "-6px",
+                  right: "-6px",
+                  width: "30px",
+                  height: "30px",
+                  borderTop: "6px solid #ef4444",
+                  borderRight: "6px solid #ef4444",
+                  borderRadius: "0 6px 0 0",
                 }}
               />
               <div
                 style={{
                   position: "absolute",
-                  bottom: "-2px",
-                  left: "-2px",
-                  width: "20px",
-                  height: "20px",
-                  borderBottom: "4px solid #ef4444",
-                  borderLeft: "4px solid #ef4444",
+                  bottom: "-6px",
+                  left: "-6px",
+                  width: "30px",
+                  height: "30px",
+                  borderBottom: "6px solid #ef4444",
+                  borderLeft: "6px solid #ef4444",
+                  borderRadius: "0 0 0 6px",
                 }}
               />
               <div
                 style={{
                   position: "absolute",
-                  bottom: "-2px",
-                  right: "-2px",
-                  width: "20px",
-                  height: "20px",
-                  borderBottom: "4px solid #ef4444",
-                  borderRight: "4px solid #ef4444",
+                  bottom: "-6px",
+                  right: "-6px",
+                  width: "30px",
+                  height: "30px",
+                  borderBottom: "6px solid #ef4444",
+                  borderRight: "6px solid #ef4444",
+                  borderRadius: "0 0 6px 0",
                 }}
               />
+
+              {/* Tarama çizgisi */}
+              <div className="scan-line" />
             </div>
 
-            {/* Tarama çizgisi animasyonu */}
+            {/* Kamera bilgisi */}
             <div
               style={{
                 position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: "200px",
-                height: "2px",
-                backgroundColor: "#ef4444",
-                animation: "scan 2s linear infinite",
+                top: "12px",
+                left: "12px",
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
+                color: "white",
+                padding: "6px 12px",
+                borderRadius: "6px",
+                fontSize: "12px",
+                fontWeight: "500",
               }}
-            />
+            >
+              📹 {systemInfo.isIOS ? "iOS" : "Android"} Kamera Aktif
+            </div>
+
+            {/* Başarı göstergesi */}
+            <div
+              style={{
+                position: "absolute",
+                top: "12px",
+                right: "12px",
+                backgroundColor: "rgba(16, 185, 129, 0.9)",
+                color: "white",
+                padding: "6px 12px",
+                borderRadius: "6px",
+                fontSize: "12px",
+                fontWeight: "500",
+              }}
+            >
+              🟢 Hazır
+            </div>
           </div>
 
           <div style={{ textAlign: "center", marginBottom: "16px" }}>
-            <p style={{ color: "#666", fontSize: "14px", margin: "0 0 8px 0" }}>
+            <p style={{ color: "#666", fontSize: "14px", margin: "0 0 4px 0" }}>
               Barkodu kırmızı çerçeve içine hizalayın
             </p>
-            <p style={{ color: "#999", fontSize: "12px", margin: 0 }}>
-              Otomatik okuma aktif...
+            <p
+              style={{
+                color: "#10b981",
+                fontSize: "12px",
+                margin: 0,
+                fontWeight: "500",
+              }}
+            >
+              🎯 Otomatik tarama aktif - Barkod algılanmayı bekliyor
             </p>
           </div>
 
           {/* Kontrol Butonları */}
           <div style={{ display: "flex", gap: "8px" }}>
             <button
-              onClick={simulateBarcodeRead}
+              onClick={() => onBarcodeScanned("SIMULATED_BARCODE_12345")} // Simüle edilmiş barkod okuma
               style={{
                 flex: 1,
-                padding: "12px",
+                padding: "14px",
                 backgroundColor: "#10b981",
                 color: "white",
                 border: "none",
@@ -735,12 +1432,12 @@ function BarcodeScanner({
                 cursor: "pointer",
               }}
             >
-              🔍 Test Okuma
+              🔍 Simüle Barkod Oku
             </button>
             <button
               onClick={stopCamera}
               style={{
-                padding: "12px 16px",
+                padding: "14px 18px",
                 backgroundColor: "#ef4444",
                 color: "white",
                 border: "none",
@@ -750,7 +1447,7 @@ function BarcodeScanner({
                 cursor: "pointer",
               }}
             >
-              ❌ Kapat
+              ❌ Kamerayı Kapat
             </button>
           </div>
         </div>
@@ -770,14 +1467,7 @@ function ProductCard({
   onDelete: (id: string) => void;
 }) {
   return (
-    <div
-      style={{
-        backgroundColor: "white",
-        borderRadius: "12px",
-        padding: "16px",
-        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-      }}
-    >
+    <div className="card">
       <div
         style={{
           display: "flex",
@@ -802,8 +1492,8 @@ function ProductCard({
           <button
             onClick={() => onUpdateQuantity(product.id, -1)}
             style={{
-              width: "32px",
-              height: "32px",
+              width: "36px",
+              height: "36px",
               border: "1px solid #d1d5db",
               borderRadius: "6px",
               backgroundColor: "white",
@@ -819,10 +1509,10 @@ function ProductCard({
           </button>
           <span
             style={{
-              minWidth: "40px",
+              minWidth: "44px",
               textAlign: "center",
               backgroundColor: "#f3f4f6",
-              padding: "6px 12px",
+              padding: "8px 12px",
               borderRadius: "6px",
               fontSize: "14px",
               fontWeight: "600",
@@ -833,8 +1523,8 @@ function ProductCard({
           <button
             onClick={() => onUpdateQuantity(product.id, 1)}
             style={{
-              width: "32px",
-              height: "32px",
+              width: "36px",
+              height: "36px",
               border: "1px solid #d1d5db",
               borderRadius: "6px",
               backgroundColor: "white",
@@ -851,8 +1541,8 @@ function ProductCard({
           <button
             onClick={() => onDelete(product.id)}
             style={{
-              width: "32px",
-              height: "32px",
+              width: "36px",
+              height: "36px",
               border: "1px solid #fca5a5",
               borderRadius: "6px",
               backgroundColor: "#fef2f2",
@@ -906,13 +1596,11 @@ function AddProductDialog({
       }}
     >
       <div
+        className="card"
         style={{
-          backgroundColor: "white",
-          borderRadius: "12px",
           padding: "24px",
           width: "100%",
           maxWidth: "400px",
-          boxShadow: "0 10px 25px rgba(0, 0, 0, 0.2)",
         }}
       >
         <h2
@@ -943,16 +1631,6 @@ function AddProductDialog({
                 onProductChange({ ...product, barcode: e.target.value })
               }
               placeholder="Barkod numarası"
-              style={{
-                width: "100%",
-                padding: "12px",
-                border: "2px solid #e5e7eb",
-                borderRadius: "8px",
-                fontSize: "16px",
-                outline: "none",
-              }}
-              onFocus={(e) => (e.target.style.borderColor = "#3b82f6")}
-              onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
             />
           </div>
 
@@ -974,16 +1652,6 @@ function AddProductDialog({
                 onProductChange({ ...product, name: e.target.value })
               }
               placeholder="Ürün adını girin"
-              style={{
-                width: "100%",
-                padding: "12px",
-                border: "2px solid #e5e7eb",
-                borderRadius: "8px",
-                fontSize: "16px",
-                outline: "none",
-              }}
-              onFocus={(e) => (e.target.style.borderColor = "#3b82f6")}
-              onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
               autoFocus
             />
           </div>
@@ -993,14 +1661,6 @@ function AddProductDialog({
               type="submit"
               style={{
                 flex: 1,
-                padding: "12px",
-                backgroundColor: "#3b82f6",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "16px",
-                fontWeight: "600",
-                cursor: "pointer",
               }}
             >
               Ekle
