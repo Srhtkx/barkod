@@ -47,7 +47,7 @@ export default function StokSayimApp() {
     type: "success" | "error" = "success"
   ) => {
     setNotification({ message, type });
-    setTimeout(() => setNotification(null), 4000);
+    setTimeout(() => setNotification(null), 3000);
   };
 
   // Barkod ile ürün ara veya ekle
@@ -184,8 +184,6 @@ export default function StokSayimApp() {
               color: "white",
               fontWeight: "500",
               boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-              maxWidth: "90%",
-              textAlign: "center",
             }}
           >
             {notification.message}
@@ -277,7 +275,7 @@ export default function StokSayimApp() {
 
         {/* Barkod Okuma Sekmesi */}
         {activeTab === "scan" && (
-          <div style={{ space: "16px" }}>
+          <div style={{}}>
             <BarcodeScanner onBarcodeScanned={handleBarcodeScanned} />
 
             {/* Son Eklenen Ürünler */}
@@ -427,7 +425,7 @@ export default function StokSayimApp() {
   );
 }
 
-// Gelişmiş Barkod Tarayıcı Komponenti
+// Barkod Tarayıcı Komponenti
 function BarcodeScanner({
   onBarcodeScanned,
 }: {
@@ -437,131 +435,36 @@ function BarcodeScanner({
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [manualBarcode, setManualBarcode] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [cameraSupported, setCameraSupported] = useState(true);
 
-  // Kamera desteği kontrolü
-  useEffect(() => {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      setCameraSupported(false);
-      setError("Bu tarayıcı kamera özelliğini desteklemiyor");
-    }
-  }, []);
-
-  // HTTPS kontrolü
-  const isHTTPS =
-    typeof window !== "undefined" &&
-    (window.location.protocol === "https:" ||
-      window.location.hostname === "localhost");
-
-  // Kamerayı başlat - Gelişmiş hata yönetimi ile
+  // Kamerayı başlat
   const startCamera = async () => {
-    if (!cameraSupported) {
-      setError("Kamera bu cihazda desteklenmiyor");
-      return;
-    }
-
-    if (!isHTTPS) {
-      setError(
-        "Kamera erişimi için HTTPS gerekli. Lütfen uygulamayı HTTPS üzerinden açın."
-      );
-      return;
-    }
-
     try {
-      setIsLoading(true);
       setError(null);
-
-      // Önce arka kamerayı dene
-      let constraints = {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: { exact: "environment" }, // Arka kamera zorunlu
-          width: { ideal: 1920, max: 1920 },
-          height: { ideal: 1080, max: 1080 },
+          facingMode: "environment", // Arka kamera
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
         },
-        audio: false,
-      };
-
-      let mediaStream: MediaStream;
-
-      try {
-        mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-      } catch (backCameraError) {
-        console.log("Arka kamera bulunamadı, ön kamerayı deniyor...");
-
-        // Arka kamera yoksa ön kamerayı dene
-        constraints = {
-          video: {
-            facingMode: "user", // Ön kamera
-            width: { ideal: 1280, max: 1920 },
-            height: { ideal: 720, max: 1080 },
-          },
-          audio: false,
-        };
-
-        try {
-          mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-        } catch (frontCameraError) {
-          // Hiçbir kamera çalışmıyorsa basit constraints dene
-          console.log(
-            "Özel kamera ayarları çalışmıyor, basit ayarları deniyor..."
-          );
-
-          constraints = {
-            video: true,
-            audio: false,
-          };
-
-          mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-        }
-      }
-
+      });
       setStream(mediaStream);
       setIsScanning(true);
-      setIsLoading(false);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Kamera erişim hatası:", err);
-      setIsLoading(false);
-
-      let errorMessage = "Kamera erişimi başarısız";
-
-      if (err.name === "NotAllowedError") {
-        errorMessage =
-          "Kamera izni reddedildi. Lütfen tarayıcı ayarlarından kamera iznini verin.";
-      } else if (err.name === "NotFoundError") {
-        errorMessage =
-          "Kamera bulunamadı. Lütfen cihazınızda kamera olduğundan emin olun.";
-      } else if (err.name === "NotReadableError") {
-        errorMessage = "Kamera başka bir uygulama tarafından kullanılıyor.";
-      } else if (err.name === "OverconstrainedError") {
-        errorMessage = "Kamera ayarları uyumsuz. Farklı bir kamera deneyin.";
-      } else if (err.name === "SecurityError") {
-        errorMessage = "Güvenlik hatası. HTTPS bağlantısı gerekli.";
-      }
-
-      setError(errorMessage);
+      setError(
+        "Kamera erişimi reddedildi veya mevcut değil. Lütfen tarayıcı ayarlarından kamera iznini kontrol edin."
+      );
     }
   };
 
   // Kamerayı durdur
   const stopCamera = () => {
     if (stream) {
-      stream.getTracks().forEach((track) => {
-        track.stop();
-        console.log("Kamera kapatıldı:", track.label);
-      });
+      stream.getTracks().forEach((track) => track.stop());
       setStream(null);
     }
     setIsScanning(false);
-    setIsLoading(false);
   };
-
-  // Sayfa kapatılırken kamerayı temizle
-  useEffect(() => {
-    return () => {
-      stopCamera();
-    };
-  }, []);
 
   // Manuel barkod girişi
   const handleManualSubmit = (e: React.FormEvent) => {
@@ -572,11 +475,11 @@ function BarcodeScanner({
     }
   };
 
-  // Test barkod okuma
+  // Simüle edilmiş barkod okuma (gerçek uygulamada ZXing kullanılır)
   const simulateBarcodeRead = () => {
     const testBarcode = prompt("Test için barkod numarası girin:");
-    if (testBarcode && testBarcode.trim()) {
-      onBarcodeScanned(testBarcode.trim());
+    if (testBarcode) {
+      onBarcodeScanned(testBarcode);
       stopCamera();
     }
   };
@@ -592,25 +495,6 @@ function BarcodeScanner({
     >
       {!isScanning ? (
         <div>
-          {/* HTTPS Uyarısı */}
-          {!isHTTPS && (
-            <div
-              style={{
-                backgroundColor: "#fef3c7",
-                border: "1px solid #f59e0b",
-                borderRadius: "8px",
-                padding: "12px",
-                marginBottom: "16px",
-                color: "#92400e",
-                fontSize: "14px",
-                textAlign: "center",
-              }}
-            >
-              ⚠️ Kamera için HTTPS gerekli. Localhostta veya HTTPS sitesinde
-              çalıştırın.
-            </div>
-          )}
-
           {/* Kamera Başlatma */}
           <div style={{ textAlign: "center", marginBottom: "24px" }}>
             <div style={{ fontSize: "64px", marginBottom: "16px" }}>📷</div>
@@ -639,40 +523,24 @@ function BarcodeScanner({
                   marginBottom: "16px",
                   color: "#dc2626",
                   fontSize: "14px",
-                  textAlign: "left",
                 }}
               >
-                <strong>Hata:</strong> {error}
-                <br />
-                <br />
-                <strong>Çözüm önerileri:</strong>
-                <ul style={{ margin: "8px 0 0 0", paddingLeft: "20px" }}>
-                  <li>Tarayıcı ayarlarından kamera iznini kontrol edin</li>
-                  <li>Uygulamayı HTTPS üzerinden açın</li>
-                  <li>Başka bir tarayıcı deneyin (Chrome önerilir)</li>
-                  <li>Manuel barkod girişini kullanın</li>
-                </ul>
+                {error}
               </div>
             )}
 
             <button
               onClick={startCamera}
-              disabled={isLoading || !cameraSupported}
               style={{
                 width: "100%",
                 padding: "16px",
-                backgroundColor: isLoading
-                  ? "#9ca3af"
-                  : cameraSupported
-                  ? "#3b82f6"
-                  : "#6b7280",
+                backgroundColor: "#3b82f6",
                 color: "white",
                 border: "none",
                 borderRadius: "8px",
                 fontSize: "16px",
                 fontWeight: "600",
-                cursor:
-                  isLoading || !cameraSupported ? "not-allowed" : "pointer",
+                cursor: "pointer",
                 marginBottom: "16px",
                 display: "flex",
                 alignItems: "center",
@@ -680,7 +548,7 @@ function BarcodeScanner({
                 gap: "8px",
               }}
             >
-              {isLoading ? "🔄 Kamera Başlatılıyor..." : "📷 Kamerayı Başlat"}
+              📷 Kamerayı Başlat
             </button>
           </div>
 
@@ -750,19 +618,18 @@ function BarcodeScanner({
               ref={(video) => {
                 if (video && stream) {
                   video.srcObject = stream;
-                  video.play().catch(console.error);
+                  video.play();
                 }
               }}
               style={{
                 width: "100%",
-                height: "280px",
+                height: "240px",
                 backgroundColor: "#000",
                 borderRadius: "8px",
                 objectFit: "cover",
               }}
               playsInline
               muted
-              autoPlay
             />
 
             {/* Barkod Okuma Çerçevesi */}
@@ -772,10 +639,10 @@ function BarcodeScanner({
                 top: "50%",
                 left: "50%",
                 transform: "translate(-50%, -50%)",
-                width: "240px",
-                height: "100px",
+                width: "200px",
+                height: "80px",
                 border: "2px dashed #ef4444",
-                borderRadius: "8px",
+                borderRadius: "4px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -785,95 +652,70 @@ function BarcodeScanner({
               <div
                 style={{
                   position: "absolute",
-                  top: "-4px",
-                  left: "-4px",
-                  width: "24px",
-                  height: "24px",
+                  top: "-2px",
+                  left: "-2px",
+                  width: "20px",
+                  height: "20px",
                   borderTop: "4px solid #ef4444",
                   borderLeft: "4px solid #ef4444",
-                  borderRadius: "4px 0 0 0",
                 }}
               />
               <div
                 style={{
                   position: "absolute",
-                  top: "-4px",
-                  right: "-4px",
-                  width: "24px",
-                  height: "24px",
+                  top: "-2px",
+                  right: "-2px",
+                  width: "20px",
+                  height: "20px",
                   borderTop: "4px solid #ef4444",
                   borderRight: "4px solid #ef4444",
-                  borderRadius: "0 4px 0 0",
                 }}
               />
               <div
                 style={{
                   position: "absolute",
-                  bottom: "-4px",
-                  left: "-4px",
-                  width: "24px",
-                  height: "24px",
+                  bottom: "-2px",
+                  left: "-2px",
+                  width: "20px",
+                  height: "20px",
                   borderBottom: "4px solid #ef4444",
                   borderLeft: "4px solid #ef4444",
-                  borderRadius: "0 0 0 4px",
                 }}
               />
               <div
                 style={{
                   position: "absolute",
-                  bottom: "-4px",
-                  right: "-4px",
-                  width: "24px",
-                  height: "24px",
+                  bottom: "-2px",
+                  right: "-2px",
+                  width: "20px",
+                  height: "20px",
                   borderBottom: "4px solid #ef4444",
                   borderRight: "4px solid #ef4444",
-                  borderRadius: "0 0 4px 0",
-                }}
-              />
-
-              {/* Tarama çizgisi */}
-              <div
-                style={{
-                  position: "absolute",
-                  width: "100%",
-                  height: "2px",
-                  backgroundColor: "#ef4444",
-                  animation: "scan 2s ease-in-out infinite",
-                  boxShadow: "0 0 10px #ef4444",
                 }}
               />
             </div>
 
-            {/* Kamera bilgisi */}
+            {/* Tarama çizgisi animasyonu */}
             <div
               style={{
                 position: "absolute",
-                top: "8px",
-                left: "8px",
-                backgroundColor: "rgba(0, 0, 0, 0.7)",
-                color: "white",
-                padding: "4px 8px",
-                borderRadius: "4px",
-                fontSize: "12px",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: "200px",
+                height: "2px",
+                backgroundColor: "#ef4444",
+                animation: "scan 2s linear infinite",
               }}
-            >
-              📹 Arka Kamera
-            </div>
+            />
           </div>
 
           <div style={{ textAlign: "center", marginBottom: "16px" }}>
-            <p style={{ color: "#666", fontSize: "14px", margin: "0 0 4px 0" }}>
+            <p style={{ color: "#666", fontSize: "14px", margin: "0 0 8px 0" }}>
               Barkodu kırmızı çerçeve içine hizalayın
             </p>
-            <p
-              style={{
-                color: "#10b981",
-                fontSize: "12px",
-                margin: 0,
-                fontWeight: "500",
-              }}
-            >
-              🟢 Kamera aktif - Otomatik tarama çalışıyor
+            <p style={{ color: "#999", fontSize: "12px", margin: 0 }}>
+              Otomatik okuma aktif...
             </p>
           </div>
 
@@ -960,8 +802,8 @@ function ProductCard({
           <button
             onClick={() => onUpdateQuantity(product.id, -1)}
             style={{
-              width: "36px",
-              height: "36px",
+              width: "32px",
+              height: "32px",
               border: "1px solid #d1d5db",
               borderRadius: "6px",
               backgroundColor: "white",
@@ -977,10 +819,10 @@ function ProductCard({
           </button>
           <span
             style={{
-              minWidth: "44px",
+              minWidth: "40px",
               textAlign: "center",
               backgroundColor: "#f3f4f6",
-              padding: "8px 12px",
+              padding: "6px 12px",
               borderRadius: "6px",
               fontSize: "14px",
               fontWeight: "600",
@@ -991,8 +833,8 @@ function ProductCard({
           <button
             onClick={() => onUpdateQuantity(product.id, 1)}
             style={{
-              width: "36px",
-              height: "36px",
+              width: "32px",
+              height: "32px",
               border: "1px solid #d1d5db",
               borderRadius: "6px",
               backgroundColor: "white",
@@ -1009,8 +851,8 @@ function ProductCard({
           <button
             onClick={() => onDelete(product.id)}
             style={{
-              width: "36px",
-              height: "36px",
+              width: "32px",
+              height: "32px",
               border: "1px solid #fca5a5",
               borderRadius: "6px",
               backgroundColor: "#fef2f2",

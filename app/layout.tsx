@@ -26,10 +26,6 @@ export default function RootLayout({
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
             background-color: #f5f5f5;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
           }
           
           button:hover {
@@ -44,42 +40,15 @@ export default function RootLayout({
             border-color: #3b82f6 !important;
           }
           
-          /* Barkod tarama animasyonu */
           @keyframes scan {
-            0% { 
-              transform: translateY(-50px);
-              opacity: 0.5;
-            }
-            50% {
-              opacity: 1;
-            }
-            100% { 
-              transform: translateY(50px);
-              opacity: 0.5;
-            }
+            0% { transform: translate(-50%, -50%) translateY(-40px); }
+            100% { transform: translate(-50%, -50%) translateY(40px); }
           }
           
-          /* Mobil optimizasyonları */
           @media (max-width: 480px) {
             body {
               font-size: 14px;
             }
-            
-            input {
-              font-size: 16px !important; /* iOS zoom engellemesi */
-            }
-          }
-          
-          /* Kamera için tam ekran desteği */
-          video {
-            -webkit-transform: scaleX(-1);
-            transform: scaleX(-1); /* Ayna efekti */
-          }
-          
-          /* Touch optimizasyonları */
-          button {
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
           }
         `}</style>
       </head>
