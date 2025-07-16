@@ -11,6 +11,12 @@ export default function Home() {
   useEffect(() => {
     const onceki = JSON.parse(localStorage.getItem("barkodlar") || "[]");
     setBarkodlar(onceki);
+    setTimeout(() => {
+      const video = document.querySelector("#reader video") as HTMLVideoElement;
+      if (video) {
+        video.style.transform = "scaleX(-1)";
+      }
+    }, 1000);
 
     if (!scannerRef.current) {
       scannerRef.current = true;
@@ -19,7 +25,7 @@ export default function Home() {
         "reader",
         {
           fps: 10,
-          qrbox: { width: 250, height: 250 },
+          qrbox: { width: 300, height: 150 },
           aspectRatio: 1,
         },
         false // verbose
