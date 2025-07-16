@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+#reader video {
+  transform: scaleX(-1); /* Aynalama düzelt */
+}
