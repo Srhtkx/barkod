@@ -24,4 +24,5 @@
 }
 #reader video {
   object-fit: cover;
+  transform: rotateY(180deg); /* ya da scaleX(-1) */
 }
