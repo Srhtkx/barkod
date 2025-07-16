@@ -1,28 +1,3 @@
-/* globals.css */
-
-#reader__scan_region {
-  position: relative;
-}
-
-#reader__scan_region::before,
-#reader__scan_region::after {
-  content: "";
-  position: absolute;
-  background: rgba(0, 0, 0, 0.6);
-  left: 0;
-  right: 0;
-  height: 40%;
-  z-index: 10;
-}
-
-#reader__scan_region::before {
-  top: 0;
-}
-
-#reader__scan_region::after {
-  bottom: 0;
-}
-#reader video {
-  object-fit: cover;
-  transform: rotateY(180deg); /* ya da scaleX(-1) */
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
