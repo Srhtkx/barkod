@@ -2,6 +2,166 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Genel sıfırlamalar ve temel stiller */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  background-color: #f8fafc; /* Hafif gri arka plan */
+  color: #334155; /* Koyu gri metin */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Kart benzeri bileşenler için temel stil */
+.card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+}
+
+/* Buton stilleri */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-primary {
+  background-color: #3b82f6; /* Mavi */
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb; /* Koyu mavi */
+}
+
+.btn-danger {
+  background-color: #ef4444; /* Kırmızı */
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #dc2626; /* Koyu kırmızı */
+}
+
+.btn-secondary {
+  background-color: #e2e8f0; /* Açık gri */
+  color: #475569; /* Koyu gri */
+}
+
+.btn-secondary:hover {
+  background-color: #cbd5e1; /* Orta gri */
+}
+
+.btn:disabled {
+  background-color: #94a3b8; /* Pasif gri */
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Input stilleri */
+input[type="text"],
+input[type="number"] {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #cbd5e1; /* Açık gri kenarlık */
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s ease;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus {
+  border-color: #3b82f6; /* Mavi odak */
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* html5-qrcode video elementine özel stil */
 #reader video {
-  transform: scaleX(-1); /* Aynalama düzelt */
+  width: 100% !important;
+  height: auto !important; /* Yüksekliği otomatik ayarla */
+  object-fit: cover; /* Görüntüyü kutuya sığdır */
+  border-radius: 8px;
+  /* html5-qrcode environment modunda genellikle aynalama yapmaz.
+     Eğer hala ters geliyorsa, aşağıdaki satırı aktif edebilirsiniz:
+     transform: scaleX(-1);
+  */
+}
+
+/* html5-qrcode scanbox stilleri */
+#reader__scan_region {
+  border: 2px dashed #ef4444 !important; /* Kırmızı kesikli çerçeve */
+  border-radius: 8px;
+}
+
+#reader__dashboard_section {
+  display: none !important; /* html5-qrcode'un varsayılan dashboard'ını gizle */
+}
+
+/* Bildirim stilleri */
+.notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  padding: 12px 24px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 90%;
+  text-align: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.notification.success {
+  background-color: #10b981; /* Yeşil */
+}
+
+.notification.error {
+  background-color: #ef4444; /* Kırmızı */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Mobil optimizasyonları */
+@media (max-width: 640px) {
+  .card {
+    padding: 16px;
+  }
+  .btn {
+    padding: 10px 16px;
+    font-size: 15px;
+  }
+  input {
+    font-size: 15px;
+  }
 }
