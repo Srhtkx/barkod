@@ -653,6 +653,7 @@ function BarcodeScanner({
   const [manualBarcode, setManualBarcode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [recentBarcodes, setRecentBarcodes] = useState<string[]>([]);
+  const [isPlayingVideo, setIsPlayingVideo] = useState(false); // Video oynatma durumunu takip etmek için yeni state
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -844,13 +845,6 @@ function BarcodeScanner({
       setStream(mediaStream);
       setIsScanning(true);
       setIsLoading(false);
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        videoRef.current.play().catch((err) => {
-          console.error("Video oynatma hatası:", err);
-        });
-      }
     } catch (err: any) {
       console.error("💥 Kamera Başlatma Hatası:", err);
       setIsLoading(false);
@@ -889,6 +883,31 @@ function BarcodeScanner({
     }
   };
 
+  // Video akışını video elementine bağlama ve oynatma
+  useEffect(() => {
+    if (stream && videoRef.current) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.onloadedmetadata = () => {
+        videoRef.current
+          ?.play()
+          .then(() => {
+            setIsPlayingVideo(true);
+            console.log("✅ Video oynatılıyor.");
+          })
+          .catch((err) => {
+            console.error("❌ Video oynatma hatası:", err);
+            setError(
+              `Video oynatma hatası: ${err.message}. Lütfen sayfayı yenileyin veya manuel girişi kullanın.`
+            );
+            setIsPlayingVideo(false);
+            stopCamera(); // Oynatma başarısız olursa kamerayı durdur
+          });
+      };
+    } else {
+      setIsPlayingVideo(false);
+    }
+  }, [stream]); // Stream değiştiğinde bu efekti tekrar çalıştır
+
   // Kamerayı durdur
   const stopCamera = () => {
     if (stream) {
@@ -900,6 +919,7 @@ function BarcodeScanner({
     }
     setIsScanning(false);
     setIsLoading(false);
+    setIsPlayingVideo(false); // Oynatma durumunu sıfırla
   };
 
   // Sayfa kapatılırken kamerayı temizle
@@ -1388,7 +1408,9 @@ function BarcodeScanner({
                 position: "absolute",
                 top: "12px",
                 right: "12px",
-                backgroundColor: "rgba(16, 185, 129, 0.9)",
+                backgroundColor: isPlayingVideo
+                  ? "rgba(16, 185, 129, 0.9)"
+                  : "rgba(255, 165, 0, 0.9)",
                 color: "white",
                 padding: "6px 12px",
                 borderRadius: "6px",
@@ -1396,7 +1418,7 @@ function BarcodeScanner({
                 fontWeight: "500",
               }}
             >
-              🟢 Hazır
+              {isPlayingVideo ? "🟢 Hazır" : "🟡 Yükleniyor..."}
             </div>
           </div>
 
