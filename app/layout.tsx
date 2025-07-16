@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Stok Sayım Uygulaması",
-  description: "HTTPS rehberi ile barkod okuma",
+  description: "Kamera ile barkod okuma ve manuel giriş ile stok sayımı",
   viewport:
     "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
 };
@@ -30,7 +30,6 @@ export default function RootLayout({
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
-            -webkit-touch-callout: none;
           }
           
           button:hover {
@@ -45,6 +44,21 @@ export default function RootLayout({
             border-color: #3b82f6 !important;
           }
           
+          /* Barkod tarama animasyonu */
+          @keyframes scan {
+            0% { 
+              transform: translateY(-50px);
+              opacity: 0.5;
+            }
+            50% {
+              opacity: 1;
+            }
+            100% { 
+              transform: translateY(50px);
+              opacity: 0.5;
+            }
+          }
+          
           /* Mobil optimizasyonları */
           @media (max-width: 480px) {
             body {
@@ -53,22 +67,19 @@ export default function RootLayout({
             
             input {
               font-size: 16px !important; /* iOS zoom engellemesi */
-              -webkit-appearance: none;
             }
-            
-            button {
-              -webkit-appearance: none;
-            }
+          }
+          
+          /* Kamera için tam ekran desteği */
+          video {
+            -webkit-transform: scaleX(-1);
+            transform: scaleX(-1); /* Ayna efekti */
           }
           
           /* Touch optimizasyonları */
           button {
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
-          }
-          
-          input {
-            -webkit-tap-highlight-color: transparent;
           }
         `}</style>
       </head>
