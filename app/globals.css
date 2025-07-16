@@ -22,3 +22,7 @@
 #reader__scan_region::after {
   bottom: 0;
 }
+#reader video {
+  transform: scaleX(-1); /* aynalı görüntüyü düzeltir */
+  object-fit: cover;
+}
